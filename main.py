@@ -1,7 +1,7 @@
 import os
 import uuid
 from uuid import UUID
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from schemas import UserCreate, UserResponse, GroupCreate, GroupResponse, GroupMembersCreate, GroupMembersResponse, BillCreate, BillResponse, ItemCreate, ItemResponse, VoteCreate, VoteResponse
@@ -14,6 +14,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from typing import Dict
 from split_calculator import SplitCalculator
+from image_processing import extract_items_from_receipt
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -24,6 +25,73 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
+
+@app.post("/process-bill-image")
+async def process_bill_image(
+    file: UploadFile = File(...),
+    group_id: str = Form(...),
+    uploaded_by: str = Form(None)
+):
+    """
+    Accepts a bill image, extracts items, creates bill and items in DB, and returns the created bill and items
+    """
+    try:
+        image_bytes = await file.read()
+        result = extract_items_from_receipt(image_bytes)
+
+        # Create bill
+        bill_id = str(uuid.uuid4())
+        now = datetime.utcnow().isoformat()
+        bill_data = {
+            "id": bill_id,
+            "group_id": group_id,
+            "payer_id": None,
+            "uploaded_by": uploaded_by,
+            "bill_date": now.split("T")[0],
+            "created_at": now
+        }
+        bill_resp = supabase.table("bills").insert(bill_data).execute()
+        if not bill_resp.data:
+            raise HTTPException(status_code=500, detail="Failed to create bill")
+
+        # Insert items
+        items_to_insert = []
+        for item in result.get("items", []):
+            items_to_insert.append({
+                "id": str(uuid.uuid4()),
+                "bill_id": bill_id,
+                "name": item["name"],
+                "price": float(item["price"]),
+                "is_tax_or_tip": item.get("is_tax_or_tip", False)
+            })
+        # Add tax and tip as items if present and > 0
+        if float(result.get("tax_amount", 0)) > 0:
+            items_to_insert.append({
+                "id": str(uuid.uuid4()),
+                "bill_id": bill_id,
+                "name": "Tax",
+                "price": float(result["tax_amount"]),
+                "is_tax_or_tip": True
+            })
+        if float(result.get("tip_amount", 0)) > 0:
+            items_to_insert.append({
+                "id": str(uuid.uuid4()),
+                "bill_id": bill_id,
+                "name": "Tip",
+                "price": float(result["tip_amount"]),
+                "is_tax_or_tip": True
+            })
+        items_resp = supabase.table("items").insert(items_to_insert).execute()
+        if not items_resp.data:
+            raise HTTPException(status_code=500, detail="Failed to create items")
+
+        return JSONResponse(content={
+            "bill": bill_resp.data[0],
+            "items": items_resp.data,
+            "extracted": result
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
 
 def parse_date(val):
     if isinstance(val, str):
