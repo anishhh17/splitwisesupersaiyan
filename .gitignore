@@ -1,0 +1,9 @@
+// add venv, env and other files that should not be tracked by git
+
+# Python virtual environment
+venv/
+# Environment variables file
+.env
+# Python cache files
+__pycache__/
+*.pyc
