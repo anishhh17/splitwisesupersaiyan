@@ -828,6 +828,122 @@ def delete_bill(bill_id: str, current_user: UserResponse = Depends(get_current_u
         raise HTTPException(status_code=500, detail=f"Failed to delete bill: {str(e)}")
 
 
+@app.delete("/items/{item_id}")
+def delete_item(item_id: str, current_user: UserResponse = Depends(get_current_user)):
+    """
+    Delete an item and all its votes
+    """
+    try:
+        # First, get the item to ensure it exists
+        item_response = supabase.table("items").select("*").eq("id", item_id).single().execute()
+        if not item_response.data:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        # Delete votes associated with this item first (due to foreign key constraints)
+        supabase.table("votes").delete().eq("item_id", item_id).execute()
+        
+        # Then delete the item itself
+        supabase.table("items").delete().eq("id", item_id).execute()
+        
+        return JSONResponse(content={
+            "status": "deleted",
+            "message": "Item and all associated votes have been deleted",
+            "item_id": item_id
+        })
+        
+    except APIError as e:
+        if getattr(e, "code", None) == "PGRST116":
+            raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=500, detail=f"Failed to delete item: {str(e)}")
+
+
+@app.delete("/votes/{vote_id}")
+def delete_vote(vote_id: str, current_user: UserResponse = Depends(get_current_user)):
+    """
+    Delete a specific vote
+    """
+    try:
+        # First, get the vote to ensure it exists
+        vote_response = supabase.table("votes").select("*").eq("id", vote_id).single().execute()
+        if not vote_response.data:
+            raise HTTPException(status_code=404, detail="Vote not found")
+        
+        # Delete the vote
+        supabase.table("votes").delete().eq("id", vote_id).execute()
+        
+        return JSONResponse(content={
+            "status": "deleted",
+            "message": "Vote has been deleted",
+            "vote_id": vote_id
+        })
+        
+    except APIError as e:
+        if getattr(e, "code", None) == "PGRST116":
+            raise HTTPException(status_code=404, detail="Vote not found")
+        raise HTTPException(status_code=500, detail=f"Failed to delete vote: {str(e)}")
+
+
+@app.get("/users/search")
+def search_users(email: str = None, name: str = None, current_user: UserResponse = Depends(get_current_user)):
+    """
+    Search users by email or name to add to groups
+    """
+    try:
+        if not email and not name:
+            raise HTTPException(status_code=400, detail="Either email or name parameter is required")
+        
+        # Build the query
+        query = supabase.table("users").select("id, name, email")
+        
+        # Apply filters based on provided parameters
+        if email:
+            query = query.ilike("email", f"%{email}%")
+        if name:
+            query = query.ilike("name", f"%{name}%")
+        
+        # Execute the query with a reasonable limit
+        response = query.limit(10).execute()
+        
+        users = []
+        for user in response.data:
+            users.append({
+                "id": user["id"],
+                "name": user["name"],
+                "email": user["email"]
+            })
+        
+        return JSONResponse(content={"users": users})
+        
+    except APIError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to search users: {str(e)}")
+
+
+@app.delete("/group_members/{membership_id}")
+def remove_user_from_group(membership_id: str, current_user: UserResponse = Depends(get_current_user)):
+    """
+    Remove user from group
+    """
+    try:
+        # First, get the membership to ensure it exists
+        membership_response = supabase.table("group_members").select("*").eq("id", membership_id).single().execute()
+        if not membership_response.data:
+            raise HTTPException(status_code=404, detail="Group membership not found")
+        
+        # Delete the membership
+        supabase.table("group_members").delete().eq("id", membership_id).execute()
+        
+        return JSONResponse(content={
+            "status": "deleted",
+            "message": "User has been removed from the group",
+            "membership_id": membership_id
+        })
+        
+    except APIError as e:
+        if getattr(e, "code", None) == "PGRST116":
+            raise HTTPException(status_code=404, detail="Group membership not found")
+        raise HTTPException(status_code=500, detail=f"Failed to remove user from group: {str(e)}")
+
+
 @app.get("/users/{user_id}/groups")
 def get_user_groups(user_id: str, current_user: UserResponse = Depends(get_current_user)):
     """
