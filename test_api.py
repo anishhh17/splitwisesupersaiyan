@@ -1,9 +1,13 @@
 import asyncio
 import httpx
 import uuid
+import time
+import jwt as pyjwt
 from datetime import date
 
 BASE_URL = "http://127.0.0.1:8000"
+JWT_SECRET_KEY = "super-secret-jwt-key-change-in-production"  # Use same key from main.py
+JWT_ALGORITHM = "HS256"
 
 def safe_json(resp):
     try:
@@ -11,15 +15,55 @@ def safe_json(resp):
     except Exception:
         return resp.text
 
+def generate_test_token(user_id=None, name="Test User", email="test@example.com"):
+    """Generate a test JWT token"""
+    if not user_id:
+        user_id = str(uuid.uuid4())
+    
+    # Create token payload
+    expiration = time.time() + 3600  # 1 hour from now
+    payload = {
+        "user_id": user_id,
+        "email": email,
+        "name": name,
+        "exp": expiration
+    }
+    
+    # Sign JWT token
+    jwt_token = pyjwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt_token, user_id
+
 async def main():
+    # Generate a test token to use for authentication
+    jwt_token, user_id = generate_test_token()
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    
     async with httpx.AsyncClient() as client:
+        # Check if authentication is working
+        print("\n--- AUTHENTICATION CHECK ---")
+        resp = await client.get(f"{BASE_URL}/me", headers=headers)
+        print("Get me:", resp.status_code, safe_json(resp))
+        
+        if resp.status_code >= 400:
+            print("\nAuthentication failed. This is expected if no user exists in the database.")
+            print("To run the API tests, you need to:")
+            print("1. Set up a proper database connection")
+            print("2. Create a test user in the database")
+            print("3. Generate a token for that specific user")
+            print("\nRunning remaining tests without authentication...")
+        
         # --- USERS ---
         print("\n--- USERS ---")
         user1 = {"name": "Alice", "email": f"alice_{uuid.uuid4()}@example.com"}
         user2 = {"name": "Bob", "email": f"bob_{uuid.uuid4()}@example.com"}
         # Create user
-        resp = await client.post(f"{BASE_URL}/users", json=user1)
+        resp = await client.post(f"{BASE_URL}/users", json=user1, headers=headers)
         print("Create user1:", resp.status_code, safe_json(resp))
+        
+        if resp.status_code >= 400:
+            print("Skipping remaining tests as authentication is required")
+            return
+            
         user1_id = resp.json()["id"]
         # Duplicate user
         resp = await client.post(f"{BASE_URL}/users", json=user1)

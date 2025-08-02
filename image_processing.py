@@ -45,7 +45,9 @@ Instructions:
 
 Return ONLY the JSON object.
     '''
-    response = model.generate_content([prompt, img])
+    response = model.generate_content([prompt, img], timeout=30)
+    if not response:
+        raise RuntimeError("Empty response from Gemini API")
     raw_output = response.text.strip()
     # Remove code fences and extract JSON block
     if raw_output.startswith("```"):

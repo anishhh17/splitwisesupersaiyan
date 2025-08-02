@@ -26,3 +26,8 @@ supabase>=1.0.0  # Add this
 pydantic[email]   # Update this for EmailStr support
 requests
 google-generativeai
+pyjwt
+starlette
+itsdangerous
+python-magic
+Pillow  # For image processing and validation
