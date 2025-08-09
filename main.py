@@ -165,7 +165,7 @@ async def login(request: Request):
     return RedirectResponse(url=authorize_url)
 
 @app.get("/auth")
-@rate_limit(max_requests=10, window_seconds=3600, per="ip")  # Limit to 10 auth requests per hour per IP
+# @rate_limit(max_requests=10, window_seconds=3600, per="ip")  # Limit to 10 auth requests per hour per IP
 async def auth(request: Request):
     """
     Google OAuth callback route that handles the authorization code exchange
