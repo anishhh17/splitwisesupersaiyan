@@ -125,10 +125,11 @@ async def get_current_user(
 # === OAuth Authentication Routes ===
 
 @app.get("/login")
+@app.get("/login")
 async def login(request: Request):
     """
     Initiates Google OAuth login flow
-    Redirects user to Google's authentication page
+    Returns JSON for mobile apps, redirects for browsers
     """
     # Generate a random state for CSRF protection
     from secrets import token_urlsafe
@@ -161,9 +162,16 @@ async def login(request: Request):
     from urllib.parse import urlencode
     authorize_url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
     
-    # Redirect to Google's authorization page
+    # Check if this is a request from a mobile app (looking for Accept header)
+    accept_header = request.headers.get("accept", "")
+    user_agent = request.headers.get("user-agent", "").lower()
+    
+    # If client accepts JSON or appears to be a mobile app, return JSON
+    if "application/json" in accept_header or "expo" in user_agent or "reactnative" in user_agent:
+        return JSONResponse(content={"auth_url": authorize_url, "state": state})
+    
+    # Otherwise, redirect to Google's authorization page (for browsers)
     return RedirectResponse(url=authorize_url)
-
 @app.get("/auth")
 # @rate_limit(max_requests=10, window_seconds=3600, per="ip")  # Limit to 10 auth requests per hour per IP
 async def auth(request: Request):
