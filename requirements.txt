@@ -10,3 +10,6 @@ starlette
 google-generativeai
 Pillow
 python-multipart
+sqlalchemy[asyncio]
+asyncpg
+pydantic
