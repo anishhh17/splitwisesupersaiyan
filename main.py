@@ -24,7 +24,9 @@ from image_processing import extract_items_from_receipt
 from file_validator import FileValidator
 from rate_limiter import rate_limit
 
-load_dotenv()
+if os.getenv("ENVIRONMENT") != "production":  # or check other env var or use __name__ == '__main__'
+    load_dotenv()
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -59,6 +61,15 @@ app.add_middleware(
 
 # Google OAuth endpoints
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint to verify server is running
+    """
+    return {"status": "ok"}
+
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 GOOGLE_SCOPE = "openid email profile"
