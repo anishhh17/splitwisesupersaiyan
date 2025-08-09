@@ -1,33 +1,12 @@
-# FastAPI for building the API
-fastapi
-
-# Uvicorn for ASGI server
-uvicorn[standard]
-
-# SQLAlchemy with asyncio support
-sqlalchemy[asyncio]
-
-# asyncpg for async PostgreSQL driver
-asyncpg
-
-# Pydantic for data validation
-pydantic
-
-# python-dotenv for environment variable management
-python-dotenv 
-
-requests
-
-
 fastapi
 uvicorn[standard]
 python-dotenv
-supabase>=1.0.0  # Add this
-pydantic[email]   # Update this for EmailStr support
+pydantic[email]
 requests
-google-generativeai
+httpx
+supabase
 pyjwt
 starlette
-itsdangerous
-python-magic
-Pillow  # For image processing and validation
+google-generativeai
+Pillow
+python-multipart
