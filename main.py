@@ -139,6 +139,11 @@ async def login(request: Request):
     
     # Get the base URL of the application
     base_url = str(request.base_url).rstrip("/")
+    
+    # Force HTTPS in production
+    if os.getenv("ENVIRONMENT") == "production":
+        base_url = base_url.replace("http://", "https://")
+    
     redirect_uri = f"{base_url}/auth"
     
     # Construct Google OAuth URL
@@ -185,6 +190,11 @@ async def auth(request: Request):
         
         # Get the base URL of the application
         base_url = str(request.base_url).rstrip("/")
+        
+        # Force HTTPS in production
+        if os.getenv("ENVIRONMENT") == "production":
+            base_url = base_url.replace("http://", "https://")
+        
         redirect_uri = f"{base_url}/auth"
         
         # Exchange authorization code for access token
