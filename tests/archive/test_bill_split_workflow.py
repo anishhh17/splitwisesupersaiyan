@@ -25,7 +25,7 @@ class BillSplitTester:
     
     def log(self, message, data=None):
         """Helper to log test results"""
-        print(f"✅ {message}")
+        print(f"SUCCESS {message}")
         if data:
             print(f"   Data: {json.dumps(data, indent=2, default=str)}")
         print()
@@ -47,7 +47,7 @@ class BillSplitTester:
                 raise ValueError(f"Unsupported HTTP method: {method}")
             
             if response.status_code != expected_status:
-                print(f"❌ Request failed: {method} {endpoint}")
+                print(f"ERROR Request failed: {method} {endpoint}")
                 print(f"   Expected status: {expected_status}, Got: {response.status_code}")
                 print(f"   Response: {response.text}")
                 return None
@@ -55,12 +55,12 @@ class BillSplitTester:
             return response.json() if response.content else {}
             
         except requests.exceptions.RequestException as e:
-            print(f"❌ Request error: {e}")
+            print(f"ERROR Request error: {e}")
             return None
     
     def test_1_create_users(self):
         """Test 1: Create test users"""
-        print("🧪 Test 1: Creating Users")
+        print("TESTING Test 1: Creating Users")
         
         # Add randomness to emails
         users_data = [
@@ -75,14 +75,14 @@ class BillSplitTester:
                 self.users[user_data["name"]] = response["id"]
                 self.log(f"Created user {user_data['name']}", response)
             else:
-                print(f"❌ Failed to create user {user_data['name']}")
+                print(f"ERROR Failed to create user {user_data['name']}")
                 return False
         
         return True
     
     def test_2_create_group(self):
         """Test 2: Create a group and add members"""
-        print("🧪 Test 2: Creating Group and Adding Members")
+        print("TESTING Test 2: Creating Group and Adding Members")
         
         # Create group with random name
         group_data = {"name": f"Dinner Friends {self.rand_suffix}"}
@@ -103,7 +103,7 @@ class BillSplitTester:
             if response:
                 self.log(f"Added {name} to group", response)
             else:
-                print(f"❌ Failed to add {name} to group")
+                print(f"ERROR Failed to add {name} to group")
                 return False
         
         # Verify group members
@@ -115,7 +115,7 @@ class BillSplitTester:
     
     def test_3_create_bill(self):
         """Test 3: Create a bill"""
-        print("🧪 Test 3: Creating Bill")
+        print("TESTING Test 3: Creating Bill")
         
         bill_data = {
             "group_id": self.group_id,
@@ -134,7 +134,7 @@ class BillSplitTester:
     
     def test_4_create_items(self):
         """Test 4: Create bill items (simulating OCR results)"""
-        print("🧪 Test 4: Creating Bill Items")
+        print("TESTING Test 4: Creating Bill Items")
         
         items_data = [
             {"bill_id": self.bill_id, "name": "Margherita Pizza", "price": 18.99, "is_tax_or_tip": False},
@@ -152,7 +152,7 @@ class BillSplitTester:
                 self.items.append(response)
                 self.log(f"Created item: {item_data['name']}", response)
             else:
-                print(f"❌ Failed to create item: {item_data['name']}")
+                print(f"ERROR Failed to create item: {item_data['name']}")
                 return False
         
         # Verify items were created
@@ -164,7 +164,7 @@ class BillSplitTester:
     
     def test_5_user_voting(self):
         """Test 5: Users vote on items they consumed"""
-        print("🧪 Test 5: User Voting on Items")
+        print("TESTING Test 5: User Voting on Items")
         
         # Define what each user ate
         voting_scenario = {
@@ -183,7 +183,7 @@ class BillSplitTester:
             for item_name in consumed_items:
                 item_id = item_name_to_id.get(item_name)
                 if not item_id:
-                    print(f"❌ Item '{item_name}' not found")
+                    print(f"ERROR Item '{item_name}' not found")
                     continue
                 
                 vote_data = {
@@ -195,14 +195,14 @@ class BillSplitTester:
                 if response:
                     self.log(f"{user_name} voted for {item_name}", response)
                 else:
-                    print(f"❌ Failed to record vote: {user_name} -> {item_name}")
+                    print(f"ERROR Failed to record vote: {user_name} -> {item_name}")
                     return False
         
         return True
     
     def test_6_calculate_split(self):
         """Test 6: Calculate bill split"""
-        print("🧪 Test 6: Calculating Bill Split")
+        print("TESTING Test 6: Calculating Bill Split")
         
         response = self.test_request("GET", f"/bills/{self.bill_id}/split")
         if not response:
@@ -229,7 +229,7 @@ class BillSplitTester:
                 assert amt > 0, f"Non-payer {uid} has non-positive amount: {amt}"
         # --- End assertions ---
         
-        print("📊 Split Summary:")
+        print("CHART Split Summary:")
         total_owed = 0
         for user_name, user_id in self.users.items():
             amount = totals.get(user_id, 0)
@@ -246,7 +246,7 @@ class BillSplitTester:
     
     def test_7_edit_scenarios(self):
         """Test 7: Test editing scenarios"""
-        print("🧪 Test 7: Testing Edit Scenarios")
+        print("TESTING Test 7: Testing Edit Scenarios")
         
         # Test 7a: Change payer
         new_payer_data = {"payer_id": self.users["Bob"]}
@@ -289,7 +289,7 @@ class BillSplitTester:
     
     def test_8_edge_cases(self):
         """Test 8: Edge cases"""
-        print("🧪 Test 8: Testing Edge Cases")
+        print("TESTING Test 8: Testing Edge Cases")
         
         # Create a new bill with no votes
         bill_data = {
@@ -320,7 +320,7 @@ class BillSplitTester:
     
     def run_all_tests(self):
         """Run all tests in sequence"""
-        print("🚀 Starting Comprehensive Bill Splitting Tests")
+        print("ROCKET Starting Comprehensive Bill Splitting Tests")
         print("=" * 50)
         
         tests = [
@@ -339,20 +339,20 @@ class BillSplitTester:
             try:
                 if test():
                     passed += 1
-                    print(f"✅ Test {i} PASSED")
+                    print(f"SUCCESS Test {i} PASSED")
                 else:
-                    print(f"❌ Test {i} FAILED")
+                    print(f"ERROR Test {i} FAILED")
             except Exception as e:
-                print(f"❌ Test {i} ERROR: {e}")
+                print(f"ERROR Test {i} ERROR: {e}")
             
             print("-" * 30)
         
-        print(f"\n🏁 Test Results: {passed}/{len(tests)} tests passed")
+        print(f"\nSYMBOL Test Results: {passed}/{len(tests)} tests passed")
         
         if passed == len(tests):
-            print("🎉 All tests passed! Your bill splitting workflow is working correctly!")
+            print("SYMBOL All tests passed! Your bill splitting workflow is working correctly!")
         else:
-            print("⚠️  Some tests failed. Check the logs above for details.")
+            print("WARNING  Some tests failed. Check the logs above for details.")
 
 
 def main():
@@ -365,12 +365,12 @@ def main():
     try:
         response = requests.get(f"{BASE_URL}/test-supabase", timeout=5)
         if response.status_code == 200:
-            print("✅ Server connection successful!")
+            print("SUCCESS Server connection successful!")
         else:
-            print("❌ Server responded with error:", response.status_code)
+            print("ERROR Server responded with error:", response.status_code)
             return
     except requests.exceptions.RequestException as e:
-        print(f"❌ Cannot connect to server at {BASE_URL}")
+        print(f"ERROR Cannot connect to server at {BASE_URL}")
         print(f"Error: {e}")
         print("Please make sure your FastAPI server is running and the URL is correct.")
         return

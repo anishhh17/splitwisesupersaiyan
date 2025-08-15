@@ -6,7 +6,7 @@ Tests both the Splitwise-style splitting and full bill calculation
 
 import unittest
 from decimal import Decimal
-from split_calculator import SplitCalculator
+from app.utils.split_calculator import SplitCalculator
 
 
 class TestSplitCalculator(unittest.TestCase):
@@ -205,7 +205,7 @@ def run_manual_tests():
     """Run some manual verification tests"""
     calc = SplitCalculator()
     
-    print("🧪 Manual Test Results")
+    print("TESTING Manual Test Results")
     print("=" * 40)
     
     # Test the Splitwise examples
@@ -229,7 +229,7 @@ def run_manual_tests():
 
 if __name__ == "__main__":
     # Run unittest suite
-    print("🚀 Running Unit Tests")
+    print("ROCKET Running Unit Tests")
     print("=" * 50)
     unittest.main(verbosity=2, exit=False)
     

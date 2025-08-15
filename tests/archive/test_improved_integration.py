@@ -16,11 +16,11 @@ async def test_improved_splitting_workflow():
     """Test the complete workflow with improved splitting logic"""
     
     async with httpx.AsyncClient(timeout=60.0) as client:
-        print("🚀 Testing Improved Bill Splitting Workflow")
+        print("ROCKET Testing Improved Bill Splitting Workflow")
         print("=" * 60)
         
         # 1. Create users
-        print("👥 Creating Users...")
+        print("SYMBOL Creating Users...")
         users = [
             {"name": "Alice", "email": f"alice_{uuid.uuid4()}@example.com"},
             {"name": "Bob", "email": f"bob_{uuid.uuid4()}@example.com"},
@@ -35,34 +35,34 @@ async def test_improved_splitting_workflow():
                 user_data = resp.json()
                 user_ids.append(user_data["id"])
                 user_names[user_data["id"]] = user["name"]
-                print(f"  ✅ Created {user['name']}: {user_data['id']}")
+                print(f"  SUCCESS Created {user['name']}: {user_data['id']}")
             else:
-                print(f"  ❌ Failed to create {user['name']}: {resp.status_code}")
+                print(f"  ERROR Failed to create {user['name']}: {resp.status_code}")
                 return False
 
         # 2. Create group
-        print("\n👥 Creating Group...")
+        print("\nSYMBOL Creating Group...")
         group = {"name": "Mario's Pizza Test Group"}
         resp = await client.post(f"{BASE_URL}/groups", json=group)
         if resp.status_code != 200:
-            print(f"  ❌ Failed to create group: {resp.status_code}")
+            print(f"  ERROR Failed to create group: {resp.status_code}")
             return False
         
         group_id = resp.json()["id"]
-        print(f"  ✅ Created group: {group_id}")
+        print(f"  SUCCESS Created group: {group_id}")
 
         # 3. Add users to group
-        print("\n👥 Adding Users to Group...")
+        print("\nSYMBOL Adding Users to Group...")
         for i, uid in enumerate(user_ids):
             membership = {"group_id": group_id, "user_id": uid}
             resp = await client.post(f"{BASE_URL}/group_members", json=membership)
             if resp.status_code == 200:
-                print(f"  ✅ Added {list(user_names.values())[i]} to group")
+                print(f"  SUCCESS Added {list(user_names.values())[i]} to group")
             else:
-                print(f"  ❌ Failed to add user to group: {resp.status_code}")
+                print(f"  ERROR Failed to add user to group: {resp.status_code}")
 
         # 4. Create bill manually (simulating the Mario's Pizza receipt)
-        print("\n🧾 Creating Bill...")
+        print("\nSYMBOL Creating Bill...")
         bill_data = {
             "group_id": group_id,
             "payer_id": user_ids[0],  # Alice pays
@@ -71,14 +71,14 @@ async def test_improved_splitting_workflow():
         }
         resp = await client.post(f"{BASE_URL}/bills", json=bill_data)
         if resp.status_code != 200:
-            print(f"  ❌ Failed to create bill: {resp.status_code}")
+            print(f"  ERROR Failed to create bill: {resp.status_code}")
             return False
         
         bill_id = resp.json()["id"]
-        print(f"  ✅ Created bill: {bill_id}")
+        print(f"  SUCCESS Created bill: {bill_id}")
 
         # 5. Create items (Mario's Pizza items)
-        print("\n🍕 Creating Bill Items...")
+        print("\nSYMBOL Creating Bill Items...")
         mario_items = [
             {"name": "Margherita Pizza", "price": 18.99, "is_tax_or_tip": False},
             {"name": "Garlic Bread", "price": 6.50, "is_tax_or_tip": False},
@@ -94,12 +94,12 @@ async def test_improved_splitting_workflow():
             if resp.status_code == 200:
                 item = resp.json()
                 created_items.append(item)
-                print(f"  ✅ Created {item_data['name']}: ${item_data['price']:.2f}")
+                print(f"  SUCCESS Created {item_data['name']}: ${item_data['price']:.2f}")
             else:
-                print(f"  ❌ Failed to create {item_data['name']}: {resp.status_code}")
+                print(f"  ERROR Failed to create {item_data['name']}: {resp.status_code}")
 
         # 6. Test different voting scenarios
-        print("\n🗳️  Testing Voting Scenarios...")
+        print("\nSYMBOL️  Testing Voting Scenarios...")
         
         # Scenario 1: Everyone shares everything equally
         print("\n  Scenario 1: Everyone shares everything equally")
@@ -160,13 +160,13 @@ async def test_voting_scenario(client, items, user_ids, user_names, bill_id, sce
                 if resp.status_code == 200:
                     ate_status = "ate" if user_id in eaters else "didn't eat"
                     user_name = user_names[user_id]
-                    print(f"    ✅ {user_name} {ate_status} {item['name']}")
+                    print(f"    SUCCESS {user_name} {ate_status} {item['name']}")
 
     # Calculate split
     resp = await client.get(f"{BASE_URL}/bills/{bill_id}/split")
     if resp.status_code == 200:
         split_result = resp.json()
-        print(f"\n    💰 Split Results for {scenario_name}:")
+        print(f"\n    SYMBOL Split Results for {scenario_name}:")
         
         totals = split_result["totals"]
         payer_id = split_result["payer_id"]
@@ -189,18 +189,18 @@ async def test_voting_scenario(client, items, user_ids, user_names, bill_id, sce
         
         # Consider values close to zero (within 1 cent) as balanced
         if abs(total_sum) < 0.01:
-            print(f"    ✅ Split balances correctly!")
+            print(f"    SUCCESS Split balances correctly!")
         else:
-            print(f"    ❌ Split doesn't balance: ${total_sum:.2f} (should be ~$0.00)")
+            print(f"    ERROR Split doesn't balance: ${total_sum:.2f} (should be ~$0.00)")
         
         # Test Splitwise logic specifically
         test_splitwise_precision(total_bill, len(user_ids))
     else:
-        print(f"    ❌ Failed to calculate split: {resp.status_code}")
+        print(f"    ERROR Failed to calculate split: {resp.status_code}")
 
 def test_splitwise_precision(total_amount, num_people):
     """Test the Splitwise splitting logic for precision"""
-    print(f"\n    🔍 Testing Splitwise Logic:")
+    print(f"\n    SYMBOL Testing Splitwise Logic:")
     print(f"    Amount: ${total_amount:.2f}, People: {num_people}")
     
     # Simulate the Splitwise logic
@@ -223,7 +223,7 @@ async def test_edge_cases():
     """Test edge cases for the splitting logic"""
     
     async with httpx.AsyncClient(timeout=60.0) as client:
-        print("\n🧪 Testing Edge Cases...")
+        print("\nTESTING Testing Edge Cases...")
         
         # Test with very small amounts
         test_cases = [
@@ -244,10 +244,10 @@ async def main():
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(f"{BASE_URL}/test-supabase")
             if resp.status_code != 200:
-                print("❌ Server connection failed")
+                print("ERROR Server connection failed")
                 return
         
-        print("✅ Server connection successful")
+        print("SUCCESS Server connection successful")
         
         # Run main workflow test
         success = await test_improved_splitting_workflow()
@@ -255,12 +255,12 @@ async def main():
         if success:
             # Run edge case tests
             await test_edge_cases()
-            print("\n🎉 All tests completed successfully!")
+            print("\nSYMBOL All tests completed successfully!")
         else:
-            print("\n❌ Some tests failed")
+            print("\nERROR Some tests failed")
             
     except Exception as e:
-        print(f"❌ Test failed with error: {e}")
+        print(f"ERROR Test failed with error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())

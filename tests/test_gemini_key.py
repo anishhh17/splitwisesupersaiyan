@@ -61,7 +61,7 @@ def create_sample_receipt():
 def test_image_processing():
     """Test Gemini's image processing capabilities with a sample receipt"""
     
-    print("🧪 Testing Gemini Image Processing")
+    print("TESTING Testing Gemini Image Processing")
     print("=" * 50)
     
     # Load environment variables
@@ -69,7 +69,7 @@ def test_image_processing():
     api_key = os.getenv("GEMINI_API_KEY")
     
     if not api_key:
-        print("❌ No GEMINI_API_KEY found in .env file")
+        print("ERROR No GEMINI_API_KEY found in .env file")
         return False
     
     try:
@@ -77,12 +77,12 @@ def test_image_processing():
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Create a sample receipt
-        print("📄 Creating sample receipt image...")
+        print("DOCUMENT Creating sample receipt image...")
         receipt_img = create_sample_receipt()
         
         # Save for reference
-        receipt_img.save("test_receipt.png")
-        print("💾 Saved test receipt as 'test_receipt.png'")
+        receipt_img.save("assets/test_receipt.png")
+        print("SYMBOL Saved test receipt as 'assets/test_receipt.png'")
         
         # Strict JSON prompt
         prompt = """
@@ -104,7 +104,7 @@ def test_image_processing():
         - Use proper numbers for price fields (e.g., 18.99).
         """
         
-        print("🔍 Analyzing receipt with Gemini...")
+        print("SYMBOL Analyzing receipt with Gemini...")
         response = model.generate_content([prompt, receipt_img])
         raw_output = response.text.strip()
         
@@ -112,7 +112,7 @@ def test_image_processing():
         if raw_output.startswith("```"):
             raw_output = raw_output.split("```")[1].replace("json", "", 1).strip()
         
-        print("📥 Gemini Response:")
+        print("INPUT Gemini Response:")
         print("-" * 30)
         print(raw_output)
         print("-" * 30)
@@ -120,36 +120,36 @@ def test_image_processing():
        
         try:
             parsed = json.loads(raw_output)
-            print("✅ Response is valid JSON!")
+            print("SUCCESS Response is valid JSON!")
             print(f"   Restaurant: {parsed.get('restaurant_name', 'N/A')}")
             print(f"   Items found: {len(parsed.get('items', []))}")
             print(f"   Total: ${parsed.get('total_amount', 0)}")
         except json.JSONDecodeError as e:
-            print(f"⚠️  Response is not valid JSON: {e}")
+            print(f"WARNING  Response is not valid JSON: {e}")
             return False
         
-        print("\n🎉 SUCCESS: Gemini can process images and return valid JSON!")
+        print("\nSYMBOL SUCCESS: Gemini can process images and return valid JSON!")
         return True
         
     except Exception as e:
-        print(f"❌ ERROR: {str(e)}")
+        print(f"ERROR ERROR: {str(e)}")
         return False
 
 # def test_with_uploaded_image(image_path):
 #     """Test with a user-provided image"""
     
 #     if not os.path.exists(image_path):
-#         print(f"❌ Image file not found: {image_path}")
+#         print(f"ERROR Image file not found: {image_path}")
 #         return False
     
-#     print(f"🖼️  Testing with uploaded image: {image_path}")
+#     print(f"SYMBOL️  Testing with uploaded image: {image_path}")
 #     print("=" * 50)
     
 #     load_dotenv()
 #     api_key = os.getenv("GEMINI_API_KEY")
     
 #     if not api_key:
-#         print("❌ No GEMINI_API_KEY found")
+#         print("ERROR No GEMINI_API_KEY found")
 #         return False
     
 #     try:
@@ -163,8 +163,8 @@ def test_image_processing():
         
 #         response = model.generate_content([prompt, img])
         
-#         print("📤 Sent image for analysis")
-#         print("📥 Gemini Response:")
+#         print("SYMBOL Sent image for analysis")
+#         print("INPUT Gemini Response:")
 #         print("-" * 30)
 #         print(response.text)
 #         print("-" * 30)
@@ -172,26 +172,26 @@ def test_image_processing():
 #         return True
         
 #     except Exception as e:
-#         print(f"❌ ERROR: {str(e)}")
+#         print(f"ERROR ERROR: {str(e)}")
 #         return False
 
 if __name__ == "__main__":
-    print("🚀 Gemini Image Processing Tester")
+    print("ROCKET Gemini Image Processing Tester")
     print("=" * 50)
     
     # Test with generated sample receipt
     success = test_image_processing()
     
     # if success:
-    #     print("\n✅ Your Gemini API is ready for bill OCR!")
-    #     print("🔧 You can now proceed with your bill splitting app")
+    #     print("\nSUCCESS Your Gemini API is ready for bill OCR!")
+    #     print("SYMBOL You can now proceed with your bill splitting app")
         
     #     # Offer to test with user image
-    #     user_image = input("\n📁 Do you have a receipt image to test? Enter path (or press Enter to skip): ").strip()
+    #     user_image = input("\nSYMBOL Do you have a receipt image to test? Enter path (or press Enter to skip): ").strip()
     #     if user_image:
     #         test_with_uploaded_image(user_image)
     # else:
-    #     print("\n❌ Image processing test failed")
+    #     print("\nERROR Image processing test failed")
     #     print("Check your API key and try again")
     
     print("\n" + "=" * 50)

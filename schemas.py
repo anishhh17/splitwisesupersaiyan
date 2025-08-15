@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, Dict, Any
 from uuid import UUID
 from datetime import date, datetime
 from decimal import Decimal
@@ -105,7 +105,7 @@ class ItemResponse(BaseModel):
     id: UUID
     bill_id: UUID
     name: str
-    price: Decimal
+    price: float
     is_tax_or_tip: bool
 
     class Config:
@@ -131,4 +131,22 @@ class VoteResponse(BaseModel):
     ate: bool
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+
+# -------------------- Authentication Models --------------------
+
+class GoogleAuthRequest(BaseModel):
+    """
+    Request model for Google ID token authentication.
+    """
+    id_token: str
+
+class AuthResponse(BaseModel):
+    """
+    Response model for successful authentication.
+    """
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: Dict[str, Any]

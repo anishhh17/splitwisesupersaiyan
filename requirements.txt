@@ -8,6 +8,7 @@ supabase
 pyjwt
 starlette
 google-generativeai
+google-auth
 Pillow
 python-multipart
 sqlalchemy[asyncio]

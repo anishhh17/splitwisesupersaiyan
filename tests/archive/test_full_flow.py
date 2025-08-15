@@ -59,7 +59,7 @@ async def create_test_user():
             if resp.status_code == 200 or resp.status_code == 201:
                 # User created successfully
                 user_id = resp.json()["id"]
-                print(f"✓ User created successfully with ID: {user_id}")
+                print(f"SYMBOL User created successfully with ID: {user_id}")
                 token, _ = generate_test_token(user_id, test_user["name"], test_user["email"])
                 return token, user_id
                 
@@ -69,7 +69,7 @@ async def create_test_user():
             
             if resp.status_code == 200 or resp.status_code == 201:
                 user_id = resp.json()["id"]
-                print(f"✓ User created via test endpoint with ID: {user_id}")
+                print(f"SYMBOL User created via test endpoint with ID: {user_id}")
                 token, _ = generate_test_token(user_id, test_user["name"], test_user["email"])
                 return token, user_id
             
@@ -81,7 +81,7 @@ async def create_test_user():
                 user_id = resp.json()["id"]
                 name = resp.json().get("name", "Test User")
                 email = resp.json().get("email", "test@example.com")
-                print(f"✓ Found existing test user with ID: {user_id}")
+                print(f"SYMBOL Found existing test user with ID: {user_id}")
                 token, _ = generate_test_token(user_id, name, email)
                 return token, user_id
                 
@@ -92,7 +92,7 @@ async def create_test_user():
             if resp.status_code == 200 and "token" in resp.json():
                 token = resp.json()["token"]
                 user_id = resp.json().get("user_id")
-                print(f"✓ Got admin token for user ID: {user_id}")
+                print(f"SYMBOL Got admin token for user ID: {user_id}")
                 return token, user_id
                 
             # If all approaches fail, fall back to generating a random token
@@ -105,7 +105,7 @@ async def create_test_user():
             me_resp = await client.get(f"{BASE_URL}/me", headers=auth_headers)
             
             if me_resp.status_code < 400:
-                print(f"✓ Self-registration successful with user ID: {user_id}")
+                print(f"SYMBOL Self-registration successful with user ID: {user_id}")
                 return token, user_id
             else:
                 print("Self-registration not supported.")
@@ -138,7 +138,7 @@ async def main():
     auth_success, headers = await check_auth_success(jwt_token, admin_id)
     
     if auth_success:
-        print("\nAuthentication SUCCESSFUL ✓")
+        print("\nAuthentication SUCCESSFUL SYMBOL")
         print(f"User ID: {admin_id}")
     else:
         print("\nAuthentication failed. This indicates that either:")
@@ -168,7 +168,7 @@ async def main():
         for i, user in enumerate(users):
             try:
                 resp = await client.post(f"{BASE_URL}/users", json=user, headers=headers)
-                status = "✓" if resp.status_code < 400 else "✗"
+                status = "SYMBOL" if resp.status_code < 400 else "SYMBOL"
                 print(f"  {status} Creating {user['name']}: {resp.status_code}")
                 
                 if resp.status_code < 400:
@@ -178,13 +178,13 @@ async def main():
                 else:
                     print(f"    Error: {safe_json(resp)}")
             except Exception as e:
-                print(f"  ✗ Error creating {user['name']}: {str(e)}")
+                print(f"  SYMBOL Error creating {user['name']}: {str(e)}")
         
         if not user_ids:
-            print("  ✗ Failed to create any users, cannot continue test")
+            print("  SYMBOL Failed to create any users, cannot continue test")
             return
         
-        print(f"  ✓ Created {len(user_ids)} users successfully")
+        print(f"  SYMBOL Created {len(user_ids)} users successfully")
 
         # 2. Create group
         print("\n2. Creating test group...")
@@ -193,13 +193,13 @@ async def main():
             resp = await client.post(f"{BASE_URL}/groups", json=group, headers=headers)
             
             if resp.status_code >= 400:
-                print(f"  ✗ Failed to create group: {resp.status_code} {safe_json(resp)}")
+                print(f"  SYMBOL Failed to create group: {resp.status_code} {safe_json(resp)}")
                 return
                 
             group_id = resp.json()["id"]
-            print(f"  ✓ Group created with ID: {group_id}")
+            print(f"  SYMBOL Group created with ID: {group_id}")
         except Exception as e:
-            print(f"  ✗ Error creating group: {str(e)}")
+            print(f"  SYMBOL Error creating group: {str(e)}")
             return
 
         # 3. Add users to group
@@ -210,19 +210,19 @@ async def main():
             try:
                 membership = {"group_id": group_id, "user_id": uid}
                 resp = await client.post(f"{BASE_URL}/group_members", json=membership, headers=headers)
-                status = "✓" if resp.status_code < 400 else "✗"
+                status = "SYMBOL" if resp.status_code < 400 else "SYMBOL"
                 print(f"  {status} Adding user {i+1} to group: {resp.status_code}")
                 
                 if resp.status_code < 400:
                     success_count += 1
             except Exception as e:
-                print(f"  ✗ Error adding user {i+1} to group: {str(e)}")
+                print(f"  SYMBOL Error adding user {i+1} to group: {str(e)}")
         
         if success_count == 0:
-            print("  ✗ Failed to add any users to group, cannot continue test")
+            print("  SYMBOL Failed to add any users to group, cannot continue test")
             return
             
-        print(f"  ✓ Added {success_count} users to group successfully")
+        print(f"  SYMBOL Added {success_count} users to group successfully")
 
         # 4. Upload bill image and create bill/items
         print("\n4. Processing bill image...")
@@ -233,16 +233,16 @@ async def main():
                 resp = await client.post(f"{BASE_URL}/process-bill-image", files=files, data=data, headers=headers)
                 
                 if resp.status_code >= 400:
-                    print(f"  ✗ Failed to process bill image: {resp.status_code} {safe_json(resp)}")
+                    print(f"  SYMBOL Failed to process bill image: {resp.status_code} {safe_json(resp)}")
                     return
                     
                 bill = resp.json()["bill"]
                 items = resp.json()["items"]
                 bill_id = bill["id"]
-                print(f"  ✓ Bill processed successfully with ID: {bill_id}")
-                print(f"  ✓ {len(items)} items extracted from bill")
+                print(f"  SYMBOL Bill processed successfully with ID: {bill_id}")
+                print(f"  SYMBOL {len(items)} items extracted from bill")
         except FileNotFoundError:
-            print("  ✗ Test bill image not found. Make sure test_bill.jpg exists in the project directory")
+            print("  SYMBOL Test bill image not found. Make sure test_bill.jpg exists in the project directory")
             print("  Trying alternate test image...")
             try:
                 # Try with another test image if available
@@ -252,19 +252,19 @@ async def main():
                     resp = await client.post(f"{BASE_URL}/process-bill-image", files=files, data=data, headers=headers)
                     
                     if resp.status_code >= 400:
-                        print(f"  ✗ Failed to process bill image: {resp.status_code} {safe_json(resp)}")
+                        print(f"  SYMBOL Failed to process bill image: {resp.status_code} {safe_json(resp)}")
                         return
                         
                     bill = resp.json()["bill"]
                     items = resp.json()["items"]
                     bill_id = bill["id"]
-                    print(f"  ✓ Bill processed successfully with ID: {bill_id} (using test_receipt.png)")
-                    print(f"  ✓ {len(items)} items extracted from bill")
+                    print(f"  SYMBOL Bill processed successfully with ID: {bill_id} (using test_receipt.png)")
+                    print(f"  SYMBOL {len(items)} items extracted from bill")
             except FileNotFoundError:
-                print("  ✗ No test images found. Cannot continue test")
+                print("  SYMBOL No test images found. Cannot continue test")
                 return
         except Exception as e:
-            print(f"  ✗ Error processing bill image: {str(e)}")
+            print(f"  SYMBOL Error processing bill image: {str(e)}")
             return
 
         # 5. Users vote for items (simulate each user votes for all items except tax/tip)
@@ -279,19 +279,19 @@ async def main():
                     try:
                         vote = {"item_id": item["id"], "user_id": uid, "ate": True}
                         resp = await client.post(f"{BASE_URL}/votes", json=vote, headers=headers)
-                        status = "✓" if resp.status_code < 400 else "✗"
+                        status = "SYMBOL" if resp.status_code < 400 else "SYMBOL"
                         print(f"    {status} User {i+1} votes: {resp.status_code}")
                         
                         if resp.status_code < 400:
                             vote_count += 1
                     except Exception as e:
-                        print(f"    ✗ Error registering vote: {str(e)}")
+                        print(f"    SYMBOL Error registering vote: {str(e)}")
         
         if vote_count == 0:
-            print("  ✗ No votes were registered, cannot continue test")
+            print("  SYMBOL No votes were registered, cannot continue test")
             return
             
-        print(f"  ✓ Registered {vote_count} votes successfully")
+        print(f"  SYMBOL Registered {vote_count} votes successfully")
 
         # 6. Get bill split calculation
         print("\n6. Calculating initial bill split...")
@@ -299,11 +299,11 @@ async def main():
             resp = await client.get(f"{BASE_URL}/bills/{bill_id}/split", headers=headers)
             
             if resp.status_code >= 400:
-                print(f"  ✗ Failed to get bill split: {resp.status_code} {safe_json(resp)}")
+                print(f"  SYMBOL Failed to get bill split: {resp.status_code} {safe_json(resp)}")
                 return
                 
             split_data = resp.json()
-            print("  ✓ Initial bill split calculated successfully")
+            print("  SYMBOL Initial bill split calculated successfully")
             
             # Display summary of the split
             print("  Split summary:")
@@ -312,7 +312,7 @@ async def main():
                 amount = user_split.get("amount", 0)
                 print(f"    User {user_id}: ${amount}")
         except Exception as e:
-            print(f"  ✗ Error calculating bill split: {str(e)}")
+            print(f"  SYMBOL Error calculating bill split: {str(e)}")
             return
         
         # 7. Update bill with payer (as admin)
@@ -322,12 +322,12 @@ async def main():
             resp = await client.put(f"{BASE_URL}/bills/{bill_id}", json=update_data, headers=headers)
             
             if resp.status_code >= 400:
-                print(f"  ✗ Failed to update bill with payer: {resp.status_code} {safe_json(resp)}")
+                print(f"  SYMBOL Failed to update bill with payer: {resp.status_code} {safe_json(resp)}")
                 print("  Continuing anyway to test final split...")
             else:
-                print(f"  ✓ Set payer to user ID: {user_ids[0]}")
+                print(f"  SYMBOL Set payer to user ID: {user_ids[0]}")
         except Exception as e:
-            print(f"  ✗ Error setting bill payer: {str(e)}")
+            print(f"  SYMBOL Error setting bill payer: {str(e)}")
             print("  Continuing anyway to test final split...")
         
         # 8. Get final bill split after setting payer
@@ -336,11 +336,11 @@ async def main():
             resp = await client.get(f"{BASE_URL}/bills/{bill_id}/split", headers=headers)
             
             if resp.status_code >= 400:
-                print(f"  ✗ Failed to get final bill split: {resp.status_code} {safe_json(resp)}")
+                print(f"  SYMBOL Failed to get final bill split: {resp.status_code} {safe_json(resp)}")
                 return
                 
             final_split = resp.json()
-            print("  ✓ Final bill split calculated successfully")
+            print("  SYMBOL Final bill split calculated successfully")
             
             # Display summary of who owes who
             print("  Payment summary:")
@@ -352,7 +352,7 @@ async def main():
                 
             print("\n--- FULL FLOW TEST COMPLETED SUCCESSFULLY ---")
         except Exception as e:
-            print(f"  ✗ Error getting final bill split: {str(e)}")
+            print(f"  SYMBOL Error getting final bill split: {str(e)}")
             return
 
 async def test_auth_scenarios():
@@ -366,7 +366,7 @@ async def test_auth_scenarios():
         resp = await client.get(f"{BASE_URL}/me")
         print(f"  Status: {resp.status_code}")
         assert resp.status_code in (401, 403), f"Expected 401/403, got {resp.status_code}"
-        print("  ✓ Authentication required (got expected 401/403)")
+        print("  SYMBOL Authentication required (got expected 401/403)")
 
     # Test 2: Invalid token format
     print("\n2. Testing with invalid token format...")
@@ -375,7 +375,7 @@ async def test_auth_scenarios():
         resp = await client.get(f"{BASE_URL}/me", headers=headers)
         print(f"  Status: {resp.status_code}")
         assert resp.status_code in (401, 403), f"Expected 401/403, got {resp.status_code}"
-        print("  ✓ Invalid tokens rejected (got expected 401/403)")
+        print("  SYMBOL Invalid tokens rejected (got expected 401/403)")
 
     # Test 3: Expired token
     print("\n3. Testing with expired token...")
@@ -394,7 +394,7 @@ async def test_auth_scenarios():
         resp = await client.get(f"{BASE_URL}/me", headers=headers)
         print(f"  Status: {resp.status_code}")
         assert resp.status_code in (401, 403), f"Expected 401/403, got {resp.status_code}"
-        print("  ✓ Expired tokens rejected (got expected 401/403)")
+        print("  SYMBOL Expired tokens rejected (got expected 401/403)")
 
     # Test 4: Valid token
     print("\n4. Testing with valid token...")
@@ -406,10 +406,10 @@ async def test_auth_scenarios():
         print(f"  Status: {resp.status_code}")
         
         if resp.status_code < 400:
-            print("  ✓ Valid token accepted")
+            print("  SYMBOL Valid token accepted")
             print(f"  User info: {safe_json(resp)}")
         else:
-            print("  ✗ Valid token rejected - this is expected if user doesn't exist in database")
+            print("  SYMBOL Valid token rejected - this is expected if user doesn't exist in database")
             print("    Note: This is not a failure if your API validates user existence")
 
     print("\nAuth scenarios test completed")
